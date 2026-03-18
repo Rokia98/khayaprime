@@ -1,0 +1,75 @@
+{
+  "name": "Khaya Prime UI/UX Toolkit",
+  "version": "1.0.0",
+  "description": "Configuration et outils pour l'audit UI/UX automatisé de Khaya Prime",
+  "agent": "ui-ux-expert",
+  "project": {
+    "name": "Khaya Prime",
+    "type": "e-commerce",
+    "framework": "Next.js 14",
+    "styling": "Tailwind CSS",
+    "database": "MySQL"
+  },
+  "uiux_standards": {
+    "accessibility": {
+      "contrast_ratio": "4.5:1",
+      "touch_targets": "44px",
+      "focus_visible": true,
+      "wcag_level": "AA"
+    },
+    "performance": {
+      "transition_duration": "300ms",
+      "loading_feedback": "200ms", 
+      "image_max_size": "500KB"
+    },
+    "responsive": {
+      "breakpoints": ["640px", "768px", "1024px", "1280px"],
+      "mobile_first": true,
+      "touch_optimized": true
+    }
+  },
+  "color_system": {
+    "khaya-primary": "#0F172A",
+    "khaya-secondary": "#F59E0B", 
+    "khaya-accent": "#10B981",
+    "khaya-light": "#F8FAFC",
+    "khaya-gray": "#64748B",
+    "khaya-dark": "#1E293B",
+    "khaya-gold": "#FBBF24",
+    "khaya-rose": "#F472B6"
+  },
+  "audit_priorities": [
+    "accessibility_critical",
+    "mobile_blocking", 
+    "design_inconsistency",
+    "performance_ux",
+    "ecommerce_conversion"
+  ],
+  "common_fixes": {
+    "button_accessibility": {
+      "pattern": "<div onClick",
+      "fix": "Use <button> with proper ARIA labels and focus styles"
+    },
+    "contrast_issues": {
+      "pattern": "text-gray-300|text-gray-400",
+      "fix": "Use khaya-primary or khaya-gray for sufficient contrast"
+    },
+    "mobile_responsive": {
+      "pattern": "w-1/2|flex.*space-x",
+      "fix": "Add responsive classes: flex-col md:flex-row"
+    },
+    "loading_states": {
+      "pattern": "onClick.*submit|onSubmit",
+      "fix": "Add loading state with disabled and visual feedback"
+    }
+  },
+  "components_to_audit": [
+    "src/components/Header.tsx",
+    "src/components/Footer.tsx", 
+    "src/components/ProductCard.tsx",
+    "src/components/AddReviewForm.tsx",
+    "src/components/ProductOrderForm.tsx",
+    "src/components/Breadcrumbs.tsx",
+    "src/app/**/page.tsx"
+  ]
+}
