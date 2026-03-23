@@ -1,5 +1,5 @@
 import ProductCard from "@/components/ProductCard";
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 // Définir un type pour nos produits
 type Product = {
@@ -11,24 +11,21 @@ type Product = {
 };
 
 async function getAllProducts(): Promise<Product[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, category 
-       FROM Product 
-       ORDER BY createdAt DESC`
-    );
-
-    // Pas besoin de mapper si les noms de colonnes correspondent déjà
-    return rows as Product[];
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true
+      }
+    });
+    return products as Product[];
   } catch (error) {
     console.error(`Impossible de récupérer tous les produits:`, error);
-    return []; // Retourner un tableau vide en cas d'erreur
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
+    return [];
   }
 }
 

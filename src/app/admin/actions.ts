@@ -1,6 +1,6 @@
 'use server';
 
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { writeFile } from 'fs/promises';
@@ -32,7 +32,22 @@ async function saveImage(imageFile: File): Promise<string> {
 }
 
 export async function deleteProduct(productId: number) {
-// ... existing code ...
+  try {
+    await prisma.review.deleteMany({
+      where: { productId }
+    });
+    await prisma.product.delete({
+      where: { id: productId }
+    });
+    revalidatePath('/admin');
+    revalidatePath('/');
+    revalidatePath('/nouveautes');
+    revalidatePath('/homme');
+    revalidatePath('/femme');
+  } catch (error) {
+    console.error('Erreur lors de la suppression du produit:', error);
+    throw error;
+  }
 }
 
 export async function addProduct(prevState: any, formData: FormData) {
@@ -47,16 +62,20 @@ export async function addProduct(prevState: any, formData: FormData) {
     return { error: "L'image est requise." };
   }
 
-  let connection;
   try {
     // Save the image and get its public path
     const imageUrl = await saveImage(imageFile);
 
-    connection = await getConnection();
-    await connection.execute(
-      'INSERT INTO Product (name, description, price, imageUrl, gender, category, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [name, description, price, imageUrl, gender, category]
-    );
+    await prisma.product.create({
+      data: {
+        name,
+        description,
+        price,
+        imageUrl,
+        gender,
+        category
+      }
+    });
     
     revalidatePath('/admin');
     revalidatePath('/');
@@ -68,9 +87,6 @@ export async function addProduct(prevState: any, formData: FormData) {
     console.error("Erreur lors de l'ajout du produit:", error);
     return { error: "Impossible d'ajouter le produit." };
   } finally {
-    if (connection) {
-      await connection.end();
-    }
     redirect('/admin');
   }
 }
@@ -86,20 +102,24 @@ export async function updateProduct(productId: number, prevState: any, formData:
   // Keep track of the image URL
   let imageUrl = formData.get('currentImageUrl') as string;
 
-  let connection;
   try {
-    connection = await getConnection();
-
     // If a new image is uploaded, save it and update the URL
     if (imageFile && imageFile.size > 0) {
       imageUrl = await saveImage(imageFile);
       // Here you might want to delete the old image from the filesystem
     }
 
-    await connection.execute(
-      'UPDATE Product SET name = ?, description = ?, price = ?, imageUrl = ?, gender = ?, category = ? WHERE id = ?',
-      [name, description, price, imageUrl, gender, category, productId]
-    );
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name,
+        description,
+        price,
+        imageUrl,
+        gender,
+        category
+      }
+    });
     
     revalidatePath('/admin');
     revalidatePath(`/produit/${productId}`);
@@ -112,9 +132,6 @@ export async function updateProduct(productId: number, prevState: any, formData:
     console.error('Erreur lors de la mise à jour du produit:', error);
     return { error: 'Impossible de mettre à jour le produit.' };
   } finally {
-    if (connection) {
-      await connection.end();
-    }
     redirect('/admin');
   }
 }

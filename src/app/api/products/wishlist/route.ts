@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -14,18 +14,24 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid IDs' }, { status: 400 });
   }
 
-  let connection;
   try {
-    connection = await getConnection();
-    const placeholders = ids.map(() => '?').join(',');
-    const query = `SELECT id, name, price, imageUrl, category, gender FROM Product WHERE id IN (${placeholders})`;
-    const [rows] = await connection.execute(query, ids);
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: ids }
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true,
+        gender: true
+      }
+    });
     
-    return NextResponse.json(rows);
+    return NextResponse.json(products);
   } catch (error) {
     console.error('Database error in wishlist API:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  } finally {
-    if (connection) await connection.end();
   }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
@@ -27,78 +27,73 @@ type Review = {
 };
 
 async function getProductById(id: number): Promise<Product | null> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, description, category, gender 
-       FROM Product 
-       WHERE id = ?`,
-      [id]
-    );
-
-    const productRows = rows as any[];
-    if (productRows.length === 0) {
-      return null;
-    }
-
-    return productRows[0] as Product;
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        description: true,
+        category: true,
+        gender: true
+      }
+    });
+    return product as Product | null;
   } catch (error) {
     console.error(`Impossible de récupérer le produit avec l'ID ${id}:`, error);
     return null;
-  } finally {
-    if (connection) {
-      // Ne pas fermer la connexion ici si on l'utilise plus bas
-    }
   }
 }
 
 async function getReviewsByProductId(productId: number): Promise<Review[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, rating, author, comment, createdAt 
-       FROM Reviews 
-       WHERE productId = ? 
-       ORDER BY createdAt DESC`,
-      [productId]
-    );
-    return (rows as any[]).map(row => ({
-      ...row,
-      createdAt: new Date(row.createdAt).toLocaleDateString('fr-FR', {
+    const reviews = await prisma.review.findMany({
+      where: { productId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        rating: true,
+        author: true,
+        comment: true,
+        createdAt: true
+      }
+    });
+    return reviews.map((review: { id: number; rating: number; author: string; comment: string | null; createdAt: Date }): Review => ({
+      ...review,
+      createdAt: new Date(review.createdAt).toLocaleDateString('fr-FR', {
         day: 'numeric', month: 'long', year: 'numeric'
       })
     }));
   } catch (error) {
     console.error('Impossible de récupérer les avis:', error);
     return [];
-  } finally {
-    if (connection) {
-      // Ne pas fermer la connexion ici
-    }
   }
 }
 
 async function getSimilarProducts(productId: number, category: string, gender: 'homme' | 'femme'): Promise<Product[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, category, gender
-       FROM Product
-       WHERE category = ? AND gender = ? AND id != ?
-       LIMIT 4`,
-      [category, gender, productId]
-    );
-    return rows as Product[];
+    const products = await prisma.product.findMany({
+      where: {
+        category,
+        gender,
+        NOT: { id: productId }
+      },
+      take: 4,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true,
+        gender: true
+      }
+    });
+    return products as Product[];
   } catch (error) {
     console.error('Impossible de récupérer les produits similaires:', error);
     return [];
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }
 

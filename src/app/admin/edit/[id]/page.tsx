@@ -1,4 +1,4 @@
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import EditProductForm from "./EditProductForm";
 import { notFound } from "next/navigation";
 
@@ -13,26 +13,23 @@ type Product = {
 };
 
 async function getProductById(id: number): Promise<Product | null> {
-    let connection;
     try {
-      connection = await getConnection();
-      const [rows] = await connection.execute(
-        `SELECT id, name, description, price, imageUrl, gender, category FROM Product WHERE id = ?`,
-        [id]
-      );
-  
-      const productRows = rows as any[];
-      if (productRows.length === 0) {
-        return null;
-      }
-      return productRows[0] as Product;
+      const product = await prisma.product.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+          gender: true,
+          category: true
+        }
+      });
+      return product as Product | null;
     } catch (error) {
       console.error(`Impossible de récupérer le produit avec l'ID ${id}:`, error);
       return null;
-    } finally {
-      if (connection) {
-        await connection.end();
-      }
     }
   }
 

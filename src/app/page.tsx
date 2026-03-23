@@ -1,27 +1,32 @@
 import ProductCard from "@/components/ProductCard";
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { ChevronRight, Mail, MapPin, Phone, Star, Truck, Shield, RotateCcw, Sparkles, Crown, Gift } from "lucide-react";
 import Link from "next/link";
 import { Product } from "@/types/Product";
 
 async function getLatestProducts(): Promise<Product[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, category, gender 
-       FROM Product 
-       ORDER BY createdAt DESC 
-       LIMIT 4`
-    );
-    return rows as Product[];
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true,
+        gender: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 4,
+    });
+    return products as Product[];
   } catch (error) {
     console.error("Impossible de récupérer les produits:", error);
     return []; // Retourner un tableau vide en cas d'erreur
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }
 

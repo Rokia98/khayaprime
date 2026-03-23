@@ -1,4 +1,4 @@
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import AdminProductList from "./ProductList";
@@ -6,22 +6,22 @@ import { Product } from "@/types/Product";
 
 
 async function getAllProducts(): Promise<Product[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, gender, category 
-       FROM Product 
-       ORDER BY createdAt DESC`
-    );
-    return rows as Product[];
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        gender: true,
+        category: true
+      }
+    });
+    return products as Product[];
   } catch (error) {
     console.error(`Impossible de récupérer tous les produits:`, error);
     return [];
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }
 

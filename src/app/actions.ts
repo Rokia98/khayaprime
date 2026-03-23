@@ -1,6 +1,6 @@
 'use server';
 
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 type ReviewState = { error?: string; success?: string };
@@ -19,13 +19,15 @@ export async function addReview(prevState: ReviewState, formData: FormData): Pro
     return { error: "La note doit être entre 1 et 5." };
   }
 
-  let connection;
   try {
-    connection = await getConnection();
-    await connection.execute(
-      'INSERT INTO Reviews (productId, rating, author, comment) VALUES (?, ?, ?, ?)',
-      [productId, rating, author, comment]
-    );
+    await prisma.review.create({
+      data: {
+        productId,
+        rating,
+        author,
+        comment,
+      },
+    });
     
     // Revalider la page produit pour afficher le nouvel avis instantanément
     revalidatePath(`/produit/${productId}`);
@@ -35,9 +37,5 @@ export async function addReview(prevState: ReviewState, formData: FormData): Pro
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'avis:", error);
     return { error: "Impossible d'ajouter l'avis." };
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }

@@ -1,22 +1,25 @@
 import ProductCard from "@/components/ProductCard";
-import { getConnection } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { Product } from "@/types/Product";
 
 async function getHommeProducts(): Promise<Product[]> {
-  let connection;
   try {
-    connection = await getConnection();
-    const [rows] = await connection.execute(
-      `SELECT id, name, price, imageUrl, category, gender FROM Product WHERE gender = 'homme' ORDER BY createdAt DESC`
-    );
-    return rows as Product[];
+    const products = await prisma.product.findMany({
+      where: { gender: 'homme' },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        category: true,
+        gender: true
+      }
+    });
+    return products as Product[];
   } catch (error) {
     console.error("Impossible de récupérer les produits pour homme:", error);
     return [];
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
   }
 }
 
