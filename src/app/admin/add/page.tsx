@@ -2,10 +2,13 @@ import ProductForm from "./ProductForm";
 
 export default async function AddProductPage() {
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="container max-w-2xl mx-auto px-6 py-12">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Ajouter un nouveau produit</h1>
+    <div className="bg-[#050810] min-h-screen pt-32 pb-20">
+      <div className="max-w-4xl mx-auto px-6">
+        <div className="mb-12 text-center animate-reveal">
+          <span className="text-khaya-secondary tracking-[0.3em] text-xs uppercase mb-2 block">Nouveau Modèle</span>
+          <h1 className="text-4xl md:text-5xl font-serif text-white italic">Création de la <span className="text-khaya-secondary">Pièce</span></h1>
+        </div>
+        <div className="animate-reveal" style={{ animationDelay: '0.2s' }}>
           <ProductForm />
         </div>
       </div>

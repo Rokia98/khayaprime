@@ -23,67 +23,69 @@ export default function AdminProductList({ products }: AdminProductListProps) {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 bg-white shadow-md rounded-lg">
-        <h2 className="text-xl font-semibold text-gray-700">Aucun produit trouvé</h2>
-        <p className="mt-2 text-gray-500">Commencez par ajouter votre premier produit !</p>
+      <div className="text-center py-20 bg-white/5 border border-white/10 backdrop-blur-sm">
+        <h2 className="text-2xl font-serif text-white italic mb-2">Aucun produit trouvé</h2>
+        <p className="text-white/40 tracking-widest uppercase text-xs">Votre catalogue est actuellement vide</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <table className="min-w-full leading-normal">
+    <div className="overflow-x-auto border border-white/10">
+      <table className="min-w-full divide-y divide-white/10">
         <thead>
-          <tr>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Image
+          <tr className="bg-white/[0.02]">
+            <th className="px-6 py-4 text-left text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
+              Aperçu
             </th>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-left text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
               Produit
             </th>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-left text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
               Genre
             </th>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-left text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
               Catégorie
             </th>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-left text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
               Prix
             </th>
-            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-right text-[10px] font-bold text-khaya-secondary uppercase tracking-[0.3em]">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-white/5 bg-transparent">
           {products.map((product) => (
-            <tr key={product.id} className={`hover:bg-gray-50 ${isPending ? 'opacity-50' : ''}`}>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded"/>
+            <tr key={product.id} className={`hover:bg-white/[0.03] transition-colors duration-300 ${isPending ? 'opacity-30' : ''}`}>
+              <td className="px-6 py-6 whitespace-nowrap">
+                <div className="h-20 w-16 overflow-hidden border border-white/10">
+                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"/>
+                </div>
               </td>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">{product.name}</p>
+              <td className="px-6 py-6 whitespace-nowrap">
+                <p className="text-white font-serif italic text-lg">{product.name}</p>
               </td>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap capitalize">{product.gender}</p>
+              <td className="px-6 py-6 whitespace-nowrap">
+                <p className="text-white/60 tracking-widest text-[10px] uppercase border border-white/10 px-2 py-1 inline-block">{product.gender}</p>
               </td>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap capitalize">{product.category}</p>
+              <td className="px-6 py-6 whitespace-nowrap">
+                <p className="text-white/60 tracking-widest text-[10px] uppercase">{product.category}</p>
               </td>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">{product.price.toLocaleString('fr-FR')} CFA</p>
+              <td className="px-6 py-6 whitespace-nowrap">
+                <p className="text-khaya-secondary font-medium tracking-widest">{product.price.toLocaleString('fr-FR')} CFA</p>
               </td>
-              <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
-                <div className="flex justify-end space-x-2">
-                  <Link href={`/admin/edit/${product.id}`} className="text-blue-600 hover:text-blue-900">
-                    <Edit size={20} />
+              <td className="px-6 py-6 whitespace-nowrap text-right">
+                <div className="flex justify-end space-x-6">
+                  <Link href={`/admin/edit/${product.id}`} className="text-white hover:text-khaya-secondary transition-colors duration-300">
+                    <Edit size={18} />
                   </Link>
                   <button 
                     onClick={() => handleDelete(product.id)}
                     disabled={isPending}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-white/30 hover:text-red-500 transition-colors duration-300 disabled:opacity-50"
                   >
-                    <Trash2 size={20} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </td>

@@ -65,6 +65,8 @@ export default function AddReviewForm({ productId }: AddReviewFormProps) {
             aria-labelledby="rating-label"
             aria-describedby="rating-description"
             aria-required="true"
+            aria-live="polite"
+            aria-atomic="true"
           >
             {[...Array(5)].map((_, index) => {
               const starValue = index + 1;
@@ -76,6 +78,10 @@ export default function AddReviewForm({ productId }: AddReviewFormProps) {
                   onClick={() => {
                     setRating(starValue);
                     setShowRatingError(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowRight' && starValue < 5) setRating(starValue + 1);
+                    if (e.key === 'ArrowLeft' && starValue > 1) setRating(starValue - 1);
                   }}
                   onMouseEnter={() => setHoverRating(starValue)}
                   onMouseLeave={() => setHoverRating(0)}

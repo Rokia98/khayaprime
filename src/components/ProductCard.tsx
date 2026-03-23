@@ -1,6 +1,9 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Eye, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/lib/CartContext';
 
 interface ProductCardProps {
   id: number;
@@ -11,65 +14,61 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ id, name, category, price, imageUrl }: ProductCardProps) => {
-  // Assurer un chemin d'image valide
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const validImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl.replace(/^\/+/, '')}`;
 
   return (
-    <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-khaya-light">
-      {/* Image Container */}
-      <div className="relative h-80 overflow-hidden rounded-t-2xl">
+    <div className="group relative flex flex-col bg-white overflow-hidden transition-all duration-700">
+      {/* Container Image avec Link global sur l'image */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-khaya-light flex items-center justify-center">
+        <Link href={`/produit/${id}`} className="absolute inset-0 z-10">
+          <span className="sr-only">Voir {name}</span>
+        </Link>
         <Image
           src={validImageUrl}
           alt={name}
           fill
-          style={{objectFit: "cover"}}
-          className="transition-transform duration-700 ease-out group-hover:scale-110"
+          style={{ objectFit: "cover" }}
+          className="transition-transform duration-1000 ease-out group-hover:scale-110"
         />
         
-        {/* Overlay au hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Actions flottantes */}
-        <div className="absolute top-4 right-4 flex flex-col space-y-2 transform translate-x-12 group-hover:translate-x-0 transition-transform duration-500">
-          <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300">
-            <Heart size={16} className="text-khaya-gray hover:text-khaya-rose" />
+        {/* Luxury Overlay */}
+        <div className="absolute inset-0 bg-khaya-dark/0 group-hover:bg-khaya-dark/5 transition-colors duration-500" />
+
+        {/* Action Menu minimaliste en bas */}
+        <div className="absolute bottom-6 left-0 w-full px-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 flex justify-center space-x-2 z-30">
+          <button 
+            onClick={() => addToCart({ id, name, price, imageUrl })}
+            className="flex-1 bg-khaya-dark text-white text-[9px] uppercase tracking-widest font-bold py-3 hover:bg-khaya-secondary transition-colors duration-300 flex items-center justify-center gap-2"
+          >
+            <ShoppingCart size={12} />
+            Commander
           </button>
-          <Link href={`/produit/${id}`} className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300">
-            <Eye size={16} className="text-khaya-gray hover:text-khaya-primary" />
-          </Link>
-        </div>
-
-        {/* Badge catégorie */}
-        <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 bg-khaya-secondary/90 backdrop-blur-sm text-khaya-primary text-xs font-semibold uppercase tracking-wide rounded-full">
-            {category}
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-6">
-        <Link href={`/produit/${id}`}>
-          <h3 className="font-playfair text-lg font-semibold text-khaya-primary group-hover:text-khaya-secondary transition-colors duration-300 mb-2 line-clamp-2">
-            {name}
-          </h3>
-        </Link>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-khaya-gray text-sm uppercase tracking-wide mb-1">{category}</p>
-            <p className="text-xl font-bold text-khaya-primary">{price.toLocaleString('fr-FR')} <span className="text-sm font-normal text-khaya-gray">FCFA</span></p>
-          </div>
-          
-          {/* Bouton d'achat rapide */}
-          <button className="w-12 h-12 bg-gradient-to-r from-khaya-secondary to-khaya-gold rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 opacity-0 group-hover:opacity-100">
-            <ShoppingCart size={18} className="text-white" />
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              toggleWishlist(id);
+            }}
+            className={`p-3 transition-colors duration-300 ${isInWishlist(id) ? 'bg-khaya-secondary text-khaya-dark' : 'bg-white text-khaya-dark hover:text-khaya-secondary'}`}
+          >
+            <Heart size={14} className={isInWishlist(id) ? 'fill-current' : ''} />
           </button>
         </div>
       </div>
 
-      {/* Barre de progression au hover */}
-      <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-khaya-secondary to-khaya-gold group-hover:w-full transition-all duration-700"></div>
+      {/* Product Info - Minimalist & Centered */}
+      <div className="pt-6 pb-2 text-center flex flex-col items-center">
+        <span className="text-[9px] uppercase tracking-[0.3em] text-khaya-gray mb-2 font-medium">{category}</span>
+        <h3 className="font-playfair text-lg text-khaya-dark group-hover:text-khaya-secondary transition-colors duration-300 mb-2">
+          <Link href={`/produit/${id}`}>{name}</Link>
+        </h3>
+        <p className="font-sans text-sm font-light tracking-wide text-khaya-dark/80">
+          {new Intl.NumberFormat('fr-FR').format(price)} <span className="text-[10px] text-khaya-secondary font-bold">FCFA</span>
+        </p>
+      </div>
+
+      {/* Hover Line Decorative */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-khaya-secondary group-hover:w-1/2 transition-all duration-700" />
     </div>
   );
 };

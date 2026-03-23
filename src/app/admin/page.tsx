@@ -29,16 +29,22 @@ export default async function AdminPage() {
   const products = await getAllProducts();
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Gestion des Produits</h1>
-          <Link href="/admin/add" className="bg-khaya-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-khaya-secondary transition-colors flex items-center space-x-2">
-            <PlusCircle size={20} />
-            <span>Ajouter un produit</span>
+    <div className="bg-[#050810] min-h-screen pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-white/10 pb-8">
+          <div>
+            <span className="text-khaya-secondary tracking-[0.3em] text-xs uppercase mb-2 block animate-reveal">Tableau de Bord</span>
+            <h1 className="text-4xl md:text-5xl font-serif text-white animate-reveal italic">Gestion des <span className="text-khaya-secondary">Collections</span></h1>
+          </div>
+          <Link href="/admin/add" className="btn-luxury group flex items-center space-x-3">
+            <PlusCircle size={18} className="group-hover:rotate-90 transition-transform duration-500" />
+            <span>AJOUTER UN PRODUIT</span>
           </Link>
         </div>
-        <AdminProductList products={products} />
+        
+        <div className="animate-reveal" style={{ animationDelay: '0.2s' }}>
+          <AdminProductList products={products} />
+        </div>
       </div>
     </div>
   );
