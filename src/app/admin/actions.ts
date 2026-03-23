@@ -9,7 +9,7 @@ import path from 'path';
 // Helper function to save the file
 async function saveImage(imageFile: File): Promise<string> {
   const bytes = await imageFile.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const buffer = new Uint8Array(bytes);
 
   // Sanitize the filename to remove special characters and spaces
   const originalName = path.parse(imageFile.name).name;
