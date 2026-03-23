@@ -31,7 +31,7 @@ export async function loginOrRegister(formData: FormData) {
 
     // Créer une session persistante via un cookie (10 ans)
     const tenYears = 10 * 365 * 24 * 60 * 60 * 1000;
-    cookies().set('khaya_user_session', JSON.stringify({
+    (await cookies()).set('khaya_user_session', JSON.stringify({
       id: user.id,
       name: user.name,
       phoneNumber: user.phoneNumber
@@ -49,7 +49,7 @@ export async function loginOrRegister(formData: FormData) {
 }
 
 export async function getSession() {
-  const sessionCookie = cookies().get('khaya_user_session');
+  const sessionCookie = (await cookies()).get('khaya_user_session');
   if (!sessionCookie) return null;
   try {
     return JSON.parse(sessionCookie.value);
@@ -59,7 +59,7 @@ export async function getSession() {
 }
 
 export async function logout() {
-  cookies().delete('khaya_user_session');
+  (await cookies()).delete('khaya_user_session');
   return { success: true };
 }
 
