@@ -3,7 +3,9 @@
 import { getConnection } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function addReview(prevState: any, formData: FormData) {
+type ReviewState = { error?: string; success?: string };
+
+export async function addReview(prevState: ReviewState, formData: FormData): Promise<ReviewState> {
   const author = formData.get('author') as string;
   const rating = Number(formData.get('rating'));
   const comment = formData.get('comment') as string;

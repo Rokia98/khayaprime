@@ -9,10 +9,7 @@ interface AddReviewFormProps {
   productId: number;
 }
 
-const initialState = {
-  error: null,
-  success: null,
-};
+const initialState: { error?: string; success?: string } = {};
 
 export default function AddReviewForm({ productId }: AddReviewFormProps) {
   const [state, formAction] = useFormState(addReview, initialState);
