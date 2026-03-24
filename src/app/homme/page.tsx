@@ -1,22 +1,17 @@
 import ProductCard from "@/components/ProductCard";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { Product } from "@/types/Product";
 
 async function getHommeProducts(): Promise<Product[]> {
   try {
-    const products = await prisma.product.findMany({
-      where: { gender: 'homme' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        category: true,
-        gender: true
-      }
-    });
-    return products as Product[];
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, category, gender')
+      .eq('gender', 'homme')
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Product[];
   } catch (error) {
     console.error("Impossible de récupérer les produits pour homme:", error);
     return [];

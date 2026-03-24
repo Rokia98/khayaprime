@@ -1,5 +1,5 @@
 import React from "react";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
@@ -28,19 +28,14 @@ type Review = {
 
 async function getProductById(id: number): Promise<Product | null> {
   try {
-    const product = await prisma.product.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        description: true,
-        category: true,
-        gender: true
-      }
-    });
-    return product as Product | null;
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, description, category, gender')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data as Product | null;
   } catch (error) {
     console.error(`Impossible de récupérer le produit avec l'ID ${id}:`, error);
     return null;
@@ -49,18 +44,15 @@ async function getProductById(id: number): Promise<Product | null> {
 
 async function getReviewsByProductId(productId: number): Promise<Review[]> {
   try {
-    const reviews = await prisma.review.findMany({
-      where: { productId },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        rating: true,
-        author: true,
-        comment: true,
-        createdAt: true
-      }
-    });
-    return reviews.map((review: { id: number; rating: number; author: string; comment: string | null; createdAt: Date }): Review => ({
+    const { data, error } = await supabase
+      .from('Review')
+      .select('id, rating, author, comment, createdAt')
+      .eq('productId', productId)
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+
+    return (data || []).map((review: any): Review => ({
       ...review,
       createdAt: new Date(review.createdAt).toLocaleDateString('fr-FR', {
         day: 'numeric', month: 'long', year: 'numeric'
@@ -74,23 +66,16 @@ async function getReviewsByProductId(productId: number): Promise<Review[]> {
 
 async function getSimilarProducts(productId: number, category: string, gender: 'homme' | 'femme'): Promise<Product[]> {
   try {
-    const products = await prisma.product.findMany({
-      where: {
-        category,
-        gender,
-        NOT: { id: productId }
-      },
-      take: 4,
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        category: true,
-        gender: true
-      }
-    });
-    return products as Product[];
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, category, gender')
+      .eq('category', category)
+      .eq('gender', gender)
+      .neq('id', productId)
+      .limit(4);
+
+    if (error) throw error;
+    return (data || []) as Product[];
   } catch (error) {
     console.error('Impossible de récupérer les produits similaires:', error);
     return [];

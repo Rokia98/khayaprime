@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
 type ReviewState = { error?: string; success?: string };
@@ -20,14 +20,18 @@ export async function addReview(prevState: ReviewState, formData: FormData): Pro
   }
 
   try {
-    await prisma.review.create({
-      data: {
-        productId,
-        rating,
-        author,
-        comment,
-      },
-    });
+    const { error } = await supabase
+      .from('Review')
+      .insert([
+        {
+          productId,
+          rating,
+          author,
+          comment,
+        }
+      ]);
+
+    if (error) throw error;
     
     // Revalider la page produit pour afficher le nouvel avis instantanément
     revalidatePath(`/produit/${productId}`);

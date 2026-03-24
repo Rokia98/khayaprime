@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { writeFile } from 'fs/promises';
@@ -33,12 +33,20 @@ async function saveImage(imageFile: File): Promise<string> {
 
 export async function deleteProduct(productId: number) {
   try {
-    await prisma.review.deleteMany({
-      where: { productId }
-    });
-    await prisma.product.delete({
-      where: { id: productId }
-    });
+    const { error: reviewError } = await supabase
+      .from('Review')
+      .delete()
+      .eq('productId', productId);
+    
+    if (reviewError) throw reviewError;
+
+    const { error: productError } = await supabase
+      .from('Product')
+      .delete()
+      .eq('id', productId);
+      
+    if (productError) throw productError;
+
     revalidatePath('/admin');
     revalidatePath('/');
     revalidatePath('/nouveautes');
@@ -66,16 +74,18 @@ export async function addProduct(prevState: any, formData: FormData) {
     // Save the image and get its public path
     const imageUrl = await saveImage(imageFile);
 
-    await prisma.product.create({
-      data: {
+    const { error } = await supabase
+      .from('Product')
+      .insert([{
         name,
         description,
         price,
         imageUrl,
         gender,
         category
-      }
-    });
+      }]);
+
+    if (error) throw error;
     
     revalidatePath('/admin');
     revalidatePath('/');
@@ -107,20 +117,21 @@ export async function updateProduct(productId: number, prevState: any, formData:
     // If a new image is uploaded, save it and update the URL
     if (imageFile && imageFile.size > 0) {
       imageUrl = await saveImage(imageFile);
-      // Here you might want to delete the old image from the filesystem
     }
 
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
+    const { error } = await supabase
+      .from('Product')
+      .update({
         name,
         description,
         price,
         imageUrl,
         gender,
         category
-      }
-    });
+      })
+      .eq('id', productId);
+
+    if (error) throw error;
     
     revalidatePath('/admin');
     revalidatePath(`/produit/${productId}`);

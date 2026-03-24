@@ -1,5 +1,5 @@
 import ProductCard from "@/components/ProductCard";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 
 // Définir un type pour nos produits
 type Product = {
@@ -12,17 +12,13 @@ type Product = {
 
 async function getAllProducts(): Promise<Product[]> {
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        category: true
-      }
-    });
-    return products as Product[];
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, category')
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Product[];
   } catch (error) {
     console.error(`Impossible de récupérer tous les produits:`, error);
     return [];

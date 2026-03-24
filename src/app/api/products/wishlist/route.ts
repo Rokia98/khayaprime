@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,21 +15,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const products = await prisma.product.findMany({
-      where: {
-        id: { in: ids }
-      },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        category: true,
-        gender: true
-      }
-    });
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, category, gender')
+      .in('id', ids);
+
+    if (error) throw error;
     
-    return NextResponse.json(products);
+    return NextResponse.json(data || []);
   } catch (error) {
     console.error('Database error in wishlist API:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

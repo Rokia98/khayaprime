@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import EditProductForm from "./EditProductForm";
 import { notFound } from "next/navigation";
 
@@ -14,19 +14,14 @@ type Product = {
 
 async function getProductById(id: number): Promise<Product | null> {
     try {
-      const product = await prisma.product.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          price: true,
-          imageUrl: true,
-          gender: true,
-          category: true
-        }
-      });
-      return product as Product | null;
+      const { data, error } = await supabase
+        .from('Product')
+        .select('id, name, description, price, imageUrl, gender, category')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data as Product | null;
     } catch (error) {
       console.error(`Impossible de récupérer le produit avec l'ID ${id}:`, error);
       return null;

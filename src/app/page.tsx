@@ -1,29 +1,19 @@
 import ProductCard from "@/components/ProductCard";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { ChevronRight, Mail, MapPin, Phone, Star, Truck, Shield, RotateCcw, Sparkles, Crown, Gift } from "lucide-react";
 import Link from "next/link";
 import { Product } from "@/types/Product";
 
 async function getLatestProducts(): Promise<Product[]> {
   try {
-    const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        category: true,
-        gender: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 4,
-    });
-    return products as Product[];
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, category, gender, description, createdAt, updatedAt')
+      .order('createdAt', { ascending: false })
+      .limit(4);
+
+    if (error) throw error;
+    return (data || []) as Product[];
   } catch (error) {
     console.error("Impossible de récupérer les produits:", error);
     return []; // Retourner un tableau vide en cas d'erreur

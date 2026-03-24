@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import AdminProductList from "./ProductList";
@@ -7,18 +7,13 @@ import { Product } from "@/types/Product";
 
 async function getAllProducts(): Promise<Product[]> {
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        imageUrl: true,
-        gender: true,
-        category: true
-      }
-    });
-    return products as Product[];
+    const { data, error } = await supabase
+      .from('Product')
+      .select('id, name, price, imageUrl, gender, category')
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Product[];
   } catch (error) {
     console.error(`Impossible de récupérer tous les produits:`, error);
     return [];
