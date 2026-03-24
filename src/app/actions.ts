@@ -20,6 +20,7 @@ export async function addReview(prevState: ReviewState, formData: FormData): Pro
   }
 
   try {
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from('Review')
       .insert([
@@ -28,6 +29,8 @@ export async function addReview(prevState: ReviewState, formData: FormData): Pro
           rating,
           author,
           comment,
+          createdAt: now,
+          updatedAt: now
         }
       ]);
 

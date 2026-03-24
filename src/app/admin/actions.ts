@@ -74,6 +74,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     // Save the image and get its public path
     const imageUrl = await saveImage(imageFile);
 
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from('Product')
       .insert([{
@@ -82,7 +83,9 @@ export async function addProduct(prevState: any, formData: FormData) {
         price,
         imageUrl,
         gender,
-        category
+        category,
+        createdAt: now,
+        updatedAt: now
       }]);
 
     if (error) throw error;
@@ -127,7 +130,8 @@ export async function updateProduct(productId: number, prevState: any, formData:
         price,
         imageUrl,
         gender,
-        category
+        category,
+        updatedAt: new Date().toISOString()
       })
       .eq('id', productId);
 
