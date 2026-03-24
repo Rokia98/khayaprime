@@ -82,14 +82,21 @@ async function getSimilarProducts(productId: number, category: string, gender: '
   }
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await getProductById(Number(params.id));
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const productId = parseInt(resolvedParams.id);
+  
+  if (isNaN(productId)) {
+    notFound();
+  }
+
+  const product = await getProductById(productId);
 
   if (!product) {
     notFound();
   }
 
-  const reviews = await getReviewsByProductId(Number(params.id));
+  const reviews = await getReviewsByProductId(productId);
   const similarProducts = await getSimilarProducts(product.id, product.category, product.gender);
   
   const totalReviews = reviews.length;
@@ -119,6 +126,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
               alt={product.name}
               fill
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
             />
             <div className="absolute top-8 left-8">

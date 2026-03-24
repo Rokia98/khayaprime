@@ -28,6 +28,7 @@ const ProductCard = ({ id, name, category, price, imageUrl }: ProductCardProps) 
           src={validImageUrl}
           alt={name}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           style={{ objectFit: "cover" }}
           className="transition-transform duration-1000 ease-out group-hover:scale-110"
         />
