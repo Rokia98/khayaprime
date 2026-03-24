@@ -83,6 +83,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     revalidatePath('/homme');
     revalidatePath('/femme');
 
+    return { success: true };
   } catch (error) {
     console.error("Erreur lors de l'ajout du produit:", error);
     return { error: "Impossible d'ajouter le produit." };
@@ -128,6 +129,7 @@ export async function updateProduct(productId: number, prevState: any, formData:
     revalidatePath('/homme');
     revalidatePath('/femme');
 
+    return { success: true };
   } catch (error) {
     console.error('Erreur lors de la mise à jour du produit:', error);
     return { error: 'Impossible de mettre à jour le produit.' };
