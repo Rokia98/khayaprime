@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useFormState } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Star, Send } from 'lucide-react';
 import { addReview } from '@/app/actions';
@@ -12,7 +12,7 @@ interface AddReviewFormProps {
 const initialState: { error?: string; success?: string } = {};
 
 export default function AddReviewForm({ productId }: AddReviewFormProps) {
-  const [state, formAction] = useActionState(addReview, initialState);
+  const [state, formAction] = useFormState(addReview, initialState);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
