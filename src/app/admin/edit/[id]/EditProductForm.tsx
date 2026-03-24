@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { updateProduct } from '../../actions';
@@ -35,7 +36,7 @@ function SubmitButton() {
 export default function EditProductForm({ product }: EditProductFormProps) {
   const initialState = { error: "" };
   const updateProductWithId = updateProduct.bind(null, product.id);
-  const [state, formAction] = useFormState(updateProductWithId, initialState);
+  const [state, formAction] = useActionState(updateProductWithId, initialState);
 
   return (
     <form action={formAction} className="space-y-8 bg-white/5 p-8 border border-white/10 backdrop-blur-md">
